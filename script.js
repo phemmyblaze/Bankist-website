@@ -113,7 +113,7 @@ tabsContainer.addEventListener('click', function (e) {
 });
 
 //////Menu fade animation
-const handleHover = function(e) {
+const handleHover = function (e) {
   if (e.target.classList.contains('nav__link')) {
     const link = e.target;
     const siblings = link.closest('.nav').querySelectorAll('.nav__link');
@@ -125,7 +125,7 @@ const handleHover = function(e) {
 
     logo.style.opacity = this;
   }
-}
+};
 
 nav.addEventListener('mouseover', handleHover.bind(0.5));
 
@@ -133,54 +133,132 @@ nav.addEventListener('mouseout', handleHover.bind(1));
 
 /////STICKY NAVIGATION
 
-const header = document.querySelector('.header')
-const navHeight = nav.getBoundingClientRect().height
+const header = document.querySelector('.header');
+const navHeight = nav.getBoundingClientRect().height;
 const stickyNav = function (entries) {
   const [entry] = entries;
 
-
-  if(!entry.isIntersecting) nav.classList.add
-  ('sticky');
-  else nav.classList.remove('sticky')
-}
+  if (!entry.isIntersecting) nav.classList.add('sticky');
+  else nav.classList.remove('sticky');
+};
 const headerObserver = new IntersectionObserver(stickyNav, {
   root: null,
   threshold: 0,
-  rootMargin: `-${navHeight}px`
-
-})
-headerObserver.observe(header)
-
+  rootMargin: `-${navHeight}px`,
+});
+headerObserver.observe(header);
 
 /////LAZY LOADING IMAGES (USERS)
-const imgTarget = document.querySelectorAll('img[data-src]')
+const imgTarget = document.querySelectorAll('img[data-src]');
 
-const loadImg = function(entries, observer) {
+const loadImg = function (entries, observer) {
   const [entry] = entries;
 
-  if(!entry.isIntersecting) return;
+  if (!entry.isIntersecting) return;
 
   ///replace
   entry.target.src = entry.target.dataset.src;
 
   entry.target.addEventListener('load', function () {
-    entry.target.classList.remove('lazy-img')
-  })
+    entry.target.classList.remove('lazy-img');
+  });
 
-
-  observer.unobserve(entry.target)
-}
+  observer.unobserve(entry.target);
+};
 
 const imgObserver = new IntersectionObserver(loadImg, {
   root: null,
   threshold: 0,
-  rootMargin: '200px'
-})
+  rootMargin: '200px',
+});
 
-imgTarget.forEach(img => imgObserver.observe(img))
+imgTarget.forEach(img => imgObserver.observe(img));
 
+/////component slider
 
+const slider = function () {
+  const slides = document.querySelectorAll('.slide');
+  const btnLeft = document.querySelector('.slider__btn--left');
+  const btnRight = document.querySelector('.slider__btn--right');
+  const dotContainer = document.querySelector('.dots');
 
+  let curSlider = 0;
+  const maxSlide = slides.length;
+
+  ////functions
+  const createDots = function () {
+    slides.forEach(function (_, i) {
+      dotContainer.insertAdjacentHTML(
+        'beforeend',
+        `<button class="dots__dot" data-slide="${i}"></button>`
+      );
+    });
+  };
+
+  const activateDot = function (slide) {
+    document
+      .querySelectorAll('.dots__dot')
+      .forEach(dot => dot.classList.remove('dots__dot--active'));
+
+    document
+      .querySelector(`.dots__dot[data-slide="${slide}"]`)
+      .classList.add('dots__dot--active');
+  };
+
+  const goToSlide = function (slide) {
+    slides.forEach(
+      (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+    );
+  };
+
+  const nextSlides = function () {
+    if (curSlider === maxSlide - 1) {
+      curSlider = 0;
+    } else {
+      curSlider++;
+    }
+
+    goToSlide(curSlider);
+    activateDot(curSlider);
+  };
+  const prevSlide = function () {
+    if (curSlider === 0) {
+      curSlider = maxSlide - 1;
+    } else {
+      curSlider--;
+    }
+
+    goToSlide(curSlider);
+    activateDot(curSlider);
+  };
+
+  const init = function () {
+    goToSlide(0);
+    createDots();
+
+    activateDot(0);
+  };
+  init();
+
+  /////event handler
+  btnRight.addEventListener('click', nextSlides);
+  btnLeft.addEventListener('click', prevSlide);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'ArrowRight') nextSlides();
+  });
+
+  dotContainer.addEventListener('click', function (e) {
+    if (e.target.classList.contains('dots__dot')) {
+      console.log('Dots');
+      const { slide } = e.target.dataset;
+      goToSlide(slide);
+      activateDot(slider);
+    }
+  });
+};
+slider();
 
 // const initialCoords = section1.getBoundingClientRect()
 // window.addEventListener('scroll', function() {
@@ -258,4 +336,3 @@ imgTarget.forEach(img => imgObserver.observe(img))
 
 // const observer = new IntersectionObserver(obsCallback, obsOptions);
 // observer.observe(section1)
-
